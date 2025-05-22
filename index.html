@@ -88,6 +88,31 @@
             /* text-sm */
             margin-top: 0.5rem;
         }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            background-color: #e2e8f0;
+            /* gray-200 */
+            color: #475569;
+            /* slate-600 */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-button.active {
+            background-color: #fff;
+            color: #2563eb;
+            /* blue-700 */
+            border-bottom: 2px solid #2563eb;
+        }
+
+        .tab-content {
+            border-top: none;
+            padding-top: 1.5rem;
+        }
     </style>
 </head>
 
@@ -121,34 +146,80 @@
 
         <div class="mb-12 p-6 bg-green-50 rounded-lg shadow-inner">
             <h2 class="text-2xl font-bold text-green-800 mb-4">2. Transporte por Buque Portacontenedores</h2>
-            <p class="text-gray-700 mb-4">Calcula las emisiones atribuidas a un contenedor específico en un viaje.</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="input-group">
-                    <label for="consumoBuqueToneladas" class="block text-gray-700 text-sm mb-2">Consumo de combustible
-                        del buque (toneladas):</label>
-                    <input type="number" id="consumoBuqueToneladas" class="p-3 border rounded-lg w-full"
-                        placeholder="Ej: 150" min="0">
-                    <p id="errorConsumoBuque" class="error-message hidden">Por favor, ingrese un número válido.</p>
-                </div>
-                <div class="input-group">
-                    <label for="tipoCombustibleBuque" class="block text-gray-700 text-sm mb-2">Tipo de combustible del
-                        buque:</label>
-                    <select id="tipoCombustibleBuque" class="p-3 border rounded-lg w-full">
-                        <option value="HFO">Fuel Oil Pesado (HFO)</option>
-                        <option value="dieselMarino">Diésel Marino / Gasoil Marino (MGO/MDO)</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="capacidadBuqueTEU" class="block text-gray-700 text-sm mb-2">Capacidad total del buque
-                        (TEU):</label>
-                    <input type="number" id="capacidadBuqueTEU" class="p-3 border rounded-lg w-full"
-                        placeholder="Ej: 5000" min="1">
-                    <p id="errorCapacidadBuque" class="error-message hidden">Por favor, ingrese un número válido (mayor
-                        que 0).</p>
-                </div>
+            <p class="text-gray-700 mb-4">Elige el método de cálculo que mejor se adapte a tus datos:</p>
+
+            <div class="flex border-b border-gray-200 mb-4">
+                <button id="tabBuqueTEU" class="tab-button active">Por Capacidad (TEU)</button>
+                <button id="tabBuqueCargaDistancia" class="tab-button">Por Carga y Distancia</button>
             </div>
-            <button id="calcularBuque" class="calculate-button w-full md:w-auto">Calcular Emisiones</button>
-            <div id="resultadoBuque" class="result-box hidden"></div>
+
+            <div id="contentBuqueTEU" class="tab-content">
+                <p class="text-gray-700 mb-4">Calcula las emisiones prorrateando el consumo total del buque por su
+                    capacidad en TEU.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="input-group">
+                        <label for="consumoBuqueToneladas" class="block text-gray-700 text-sm mb-2">Consumo de
+                            combustible del buque (toneladas):</label>
+                        <input type="number" id="consumoBuqueToneladas" class="p-3 border rounded-lg w-full"
+                            placeholder="Ej: 150" min="0">
+                        <p id="errorConsumoBuque" class="error-message hidden">Por favor, ingrese un número válido.</p>
+                    </div>
+                    <div class="input-group">
+                        <label for="tipoCombustibleBuque" class="block text-gray-700 text-sm mb-2">Tipo de combustible
+                            del buque:</label>
+                        <select id="tipoCombustibleBuque" class="p-3 border rounded-lg w-full">
+                            <option value="HFO">Fuel Oil Pesado (HFO)</option>
+                            <option value="dieselMarino">Diésel Marino / Gasoil Marino (MGO/MDO)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="capacidadBuqueTEU" class="block text-gray-700 text-sm mb-2">Capacidad total del
+                            buque (TEU):</label>
+                        <input type="number" id="capacidadBuqueTEU" class="p-3 border rounded-lg w-full"
+                            placeholder="Ej: 5000" min="1">
+                        <p id="errorCapacidadBuque" class="error-message hidden">Por favor, ingrese un número válido
+                            (mayor que 0).</p>
+                    </div>
+                </div>
+                <button id="calcularBuque" class="calculate-button w-full md:w-auto">Calcular Emisiones (por
+                    TEU)</button>
+                <div id="resultadoBuque" class="result-box hidden"></div>
+            </div>
+
+            <div id="contentBuqueCargaDistancia" class="tab-content hidden">
+                <p class="text-gray-700 mb-4">Calcula las emisiones para un envío específico, basándose en el peso de tu
+                    carga y la distancia.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="input-group">
+                        <label for="pesoCargaBuqueKg" class="block text-gray-700 text-sm mb-2">Peso de tu carga
+                            (kilogramos):</label>
+                        <input type="number" id="pesoCargaBuqueKg" class="p-3 border rounded-lg w-full"
+                            placeholder="Ej: 20000" min="0">
+                        <p id="errorPesoCargaBuque" class="error-message hidden">Por favor, ingrese un número válido.
+                        </p>
+                    </div>
+                    <div class="input-group">
+                        <label for="distanciaBuqueKm" class="block text-gray-700 text-sm mb-2">Distancia del viaje
+                            (kilómetros):</label>
+                        <input type="number" id="distanciaBuqueKm" class="p-3 border rounded-lg w-full"
+                            placeholder="Ej: 10000" min="0">
+                        <p id="errorDistanciaBuque" class="error-message hidden">Por favor, ingrese un número válido.
+                        </p>
+                    </div>
+                    <div class="input-group">
+                        <label for="factorEmisionBuqueCarga" class="block text-gray-700 text-sm mb-2">Factor de emisión
+                            (kg CO₂e/tonelada-km):</label>
+                        <input type="number" id="factorEmisionBuqueCarga" class="p-3 border rounded-lg w-full"
+                            value="0.01" step="0.001" min="0">
+                        <p id="errorFactorBuqueCarga" class="error-message hidden">Por favor, ingrese un número válido.
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">Valor típico: 0.01 - 0.02 kg CO₂e/tonelada-km</p>
+                    </div>
+                </div>
+                <button id="calcularBuqueCargaDistancia" class="calculate-button w-full md:w-auto">Calcular Emisiones
+                    (por Carga)</button>
+                <div id="resultadoBuqueCargaDistancia" class="result-box hidden"></div>
+            </div>
         </div>
 
         <div class="p-6 bg-purple-50 rounded-lg shadow-inner">
@@ -175,6 +246,7 @@
                     <input type="number" id="factorEmisionAereo" class="p-3 border rounded-lg w-full" value="1.0"
                         step="0.1" min="0">
                     <p id="errorFactorAereo" class="error-message hidden">Por favor, ingrese un número válido.</p>
+                    <p class="text-xs text-gray-500 mt-1">Valor típico con RFI: 0.8 - 1.2 kg CO₂e/tonelada-km</p>
                 </div>
             </div>
             <button id="calcularAereo" class="calculate-button w-full md:w-auto">Calcular Emisiones</button>
@@ -193,7 +265,7 @@
                 HFO: 3114, // kg CO2/tonelada
                 dieselMarino: 3206 // kg CO2/tonelada
             }
-            // Para carga aérea, el factor ya se proporciona por tonelada-km
+            // Para carga aérea y buque por carga, el factor ya se proporciona por tonelada-km
         };
 
         // --- Elementos del DOM ---
@@ -204,7 +276,13 @@
         const resultadoTrailerDiv = document.getElementById('resultadoTrailer');
         const errorConsumoLitros = document.getElementById('errorConsumoLitros');
 
-        // Buque
+        // Buque - Tabs
+        const tabBuqueTEU = document.getElementById('tabBuqueTEU');
+        const tabBuqueCargaDistancia = document.getElementById('tabBuqueCargaDistancia');
+        const contentBuqueTEU = document.getElementById('contentBuqueTEU');
+        const contentBuqueCargaDistancia = document.getElementById('contentBuqueCargaDistancia');
+
+        // Buque - Por Capacidad (TEU)
         const consumoBuqueToneladasInput = document.getElementById('consumoBuqueToneladas');
         const tipoCombustibleBuqueSelect = document.getElementById('tipoCombustibleBuque');
         const capacidadBuqueTEUInput = document.getElementById('capacidadBuqueTEU');
@@ -212,6 +290,16 @@
         const resultadoBuqueDiv = document.getElementById('resultadoBuque');
         const errorConsumoBuque = document.getElementById('errorConsumoBuque');
         const errorCapacidadBuque = document.getElementById('errorCapacidadBuque');
+
+        // Buque - Por Carga y Distancia
+        const pesoCargaBuqueKgInput = document.getElementById('pesoCargaBuqueKg');
+        const distanciaBuqueKmInput = document.getElementById('distanciaBuqueKm');
+        const factorEmisionBuqueCargaInput = document.getElementById('factorEmisionBuqueCarga');
+        const calcularBuqueCargaDistanciaBtn = document.getElementById('calcularBuqueCargaDistancia');
+        const resultadoBuqueCargaDistanciaDiv = document.getElementById('resultadoBuqueCargaDistancia');
+        const errorPesoCargaBuque = document.getElementById('errorPesoCargaBuque');
+        const errorDistanciaBuque = document.getElementById('errorDistanciaBuque');
+        const errorFactorBuqueCarga = document.getElementById('errorFactorBuqueCarga');
 
         // Aéreo
         const pesoCargaKgInput = document.getElementById('pesoCargaKg');
@@ -262,9 +350,9 @@
         }
 
         /**
-         * Calcula las emisiones de CO2 para un buque portacontenedores.
+         * Calcula las emisiones de CO2 para un buque portacontenedores por capacidad (TEU).
          */
-        function calcularEmisionesBuque() {
+        function calcularEmisionesBuquePorTEU() {
             const consumoBuqueToneladas = validateInput(consumoBuqueToneladasInput.value, errorConsumoBuque);
             const tipoCombustibleBuque = tipoCombustibleBuqueSelect.value;
             const capacidadBuqueTEU = validateInput(capacidadBuqueTEUInput.value, errorCapacidadBuque, false); // No permite cero
@@ -281,6 +369,28 @@
             resultadoBuqueDiv.innerHTML = `Emisiones estimadas por contenedor (1 TEU): <span class="font-bold text-green-900">${emisionesPorContenedor.toFixed(2)} kg CO$_2$</span>`;
             resultadoBuqueDiv.classList.remove('hidden');
         }
+
+        /**
+         * Calcula las emisiones de CO2 para un envío en buque por peso de carga y distancia.
+         */
+        function calcularEmisionesBuquePorCargaDistancia() {
+            const pesoCargaBuqueKg = validateInput(pesoCargaBuqueKgInput.value, errorPesoCargaBuque);
+            const distanciaBuqueKm = validateInput(distanciaBuqueKmInput.value, errorDistanciaBuque);
+            const factorEmisionBuqueCarga = validateInput(factorEmisionBuqueCargaInput.value, errorFactorBuqueCarga);
+
+            if (pesoCargaBuqueKg === null || distanciaBuqueKm === null || factorEmisionBuqueCarga === null) {
+                resultadoBuqueCargaDistanciaDiv.classList.add('hidden');
+                return;
+            }
+
+            // Convertir peso de kg a toneladas para la fórmula
+            const pesoCargaBuqueTon = pesoCargaBuqueKg / 1000;
+            const emisiones = pesoCargaBuqueTon * distanciaBuqueKm * factorEmisionBuqueCarga;
+
+            resultadoBuqueCargaDistanciaDiv.innerHTML = `Emisiones estimadas para tu carga: <span class="font-bold text-green-900">${emisiones.toFixed(2)} kg CO$_2$e</span>`;
+            resultadoBuqueCargaDistanciaDiv.classList.remove('hidden');
+        }
+
 
         /**
          * Calcula las emisiones de CO2 para carga aérea.
@@ -305,16 +415,42 @@
 
         // --- Event Listeners ---
         calcularTrailerBtn.addEventListener('click', calcularEmisionesTrailer);
-        calcularBuqueBtn.addEventListener('click', calcularEmisionesBuque);
+        calcularBuqueBtn.addEventListener('click', calcularEmisionesBuquePorTEU);
+        calcularBuqueCargaDistanciaBtn.addEventListener('click', calcularEmisionesBuquePorCargaDistancia);
         calcularAereoBtn.addEventListener('click', calcularEmisionesAereo);
 
         // Ocultar resultados al cambiar inputs
         consumoLitrosInput.addEventListener('input', () => resultadoTrailerDiv.classList.add('hidden'));
         tipoCombustibleTrailerSelect.addEventListener('change', () => resultadoTrailerDiv.classList.add('hidden'));
 
+        // Buque - Resetear resultados al cambiar de tab
+        tabBuqueTEU.addEventListener('click', () => {
+            tabBuqueTEU.classList.add('active');
+            tabBuqueCargaDistancia.classList.remove('active');
+            contentBuqueTEU.classList.remove('hidden');
+            contentBuqueCargaDistancia.classList.add('hidden');
+            resultadoBuqueDiv.classList.add('hidden');
+            resultadoBuqueCargaDistanciaDiv.classList.add('hidden');
+        });
+
+        tabBuqueCargaDistancia.addEventListener('click', () => {
+            tabBuqueCargaDistancia.classList.add('active');
+            tabBuqueTEU.classList.remove('active');
+            contentBuqueCargaDistancia.classList.remove('hidden');
+            contentBuqueTEU.classList.add('hidden');
+            resultadoBuqueDiv.classList.add('hidden');
+            resultadoBuqueCargaDistanciaDiv.classList.add('hidden');
+        });
+
+        // Buque - Ocultar resultados al cambiar inputs (para ambos tabs)
         consumoBuqueToneladasInput.addEventListener('input', () => resultadoBuqueDiv.classList.add('hidden'));
         tipoCombustibleBuqueSelect.addEventListener('change', () => resultadoBuqueDiv.classList.add('hidden'));
         capacidadBuqueTEUInput.addEventListener('input', () => resultadoBuqueDiv.classList.add('hidden'));
+
+        pesoCargaBuqueKgInput.addEventListener('input', () => resultadoBuqueCargaDistanciaDiv.classList.add('hidden'));
+        distanciaBuqueKmInput.addEventListener('input', () => resultadoBuqueCargaDistanciaDiv.classList.add('hidden'));
+        factorEmisionBuqueCargaInput.addEventListener('input', () => resultadoBuqueCargaDistanciaDiv.classList.add('hidden'));
+
 
         pesoCargaKgInput.addEventListener('input', () => resultadoAereoDiv.classList.add('hidden'));
         distanciaKmInput.addEventListener('input', () => resultadoAereoDiv.classList.add('hidden'));
