@@ -122,26 +122,72 @@
 
         <div class="mb-12 p-6 bg-blue-50 rounded-lg shadow-inner">
             <h2 class="text-2xl font-bold text-blue-800 mb-4">1. Transporte por Tráiler</h2>
-            <p class="text-gray-700 mb-4">Calcula las emisiones basándose en el consumo de combustible.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="input-group">
-                    <label for="consumoLitros" class="block text-gray-700 text-sm mb-2">Consumo de combustible
-                        (litros):</label>
-                    <input type="number" id="consumoLitros" class="p-3 border rounded-lg w-full" placeholder="Ej: 500"
-                        min="0">
-                    <p id="errorConsumoLitros" class="error-message hidden">Por favor, ingrese un número válido.</p>
-                </div>
-                <div class="input-group">
-                    <label for="tipoCombustibleTrailer" class="block text-gray-700 text-sm mb-2">Tipo de
-                        combustible:</label>
-                    <select id="tipoCombustibleTrailer" class="p-3 border rounded-lg w-full">
-                        <option value="diesel">Diésel</option>
-                        <option value="gasolina">Gasolina</option>
-                    </select>
-                </div>
+            <p class="text-gray-700 mb-4">Elige el método de cálculo que mejor se adapte a tus datos:</p>
+
+            <div class="flex border-b border-gray-200 mb-4">
+                <button id="tabTrailerConsumo" class="tab-button active">Por Consumo Directo (Litros)</button>
+                <button id="tabTrailerCargaDistancia" class="tab-button">Por Carga y Distancia</button>
             </div>
-            <button id="calcularTrailer" class="calculate-button w-full md:w-auto">Calcular Emisiones</button>
-            <div id="resultadoTrailer" class="result-box hidden"></div>
+
+            <div id="contentTrailerConsumo" class="tab-content">
+                <p class="text-gray-700 mb-4">Calcula las emisiones basándose en la cantidad total de combustible
+                    consumido.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="input-group">
+                        <label for="consumoLitros" class="block text-gray-700 text-sm mb-2">Consumo de combustible
+                            (litros):</label>
+                        <input type="number" id="consumoLitros" class="p-3 border rounded-lg w-full"
+                            placeholder="Ej: 500" min="0">
+                        <p id="errorConsumoLitros" class="error-message hidden">Por favor, ingrese un número válido.</p>
+                    </div>
+                    <div class="input-group">
+                        <label for="tipoCombustibleTrailer" class="block text-gray-700 text-sm mb-2">Tipo de
+                            combustible:</label>
+                        <select id="tipoCombustibleTrailer" class="p-3 border rounded-lg w-full">
+                            <option value="diesel">Diésel</option>
+                            <option value="gasolina">Gasolina</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="calcularTrailer" class="calculate-button w-full md:w-auto">Calcular Emisiones (por
+                    Litros)</button>
+                <div id="resultadoTrailer" class="result-box hidden"></div>
+            </div>
+
+            <div id="contentTrailerCargaDistancia" class="tab-content hidden">
+                <p class="text-gray-700 mb-4">Calcula las emisiones para un envío específico, basándose en el peso de la
+                    carga y la distancia.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="input-group">
+                        <label for="pesoCargaTrailerKg" class="block text-gray-700 text-sm mb-2">Peso de la carga
+                            (kilogramos):</label>
+                        <input type="number" id="pesoCargaTrailerKg" class="p-3 border rounded-lg w-full"
+                            placeholder="Ej: 20000" min="0">
+                        <p id="errorPesoCargaTrailer" class="error-message hidden">Por favor, ingrese un número válido.
+                        </p>
+                    </div>
+                    <div class="input-group">
+                        <label for="distanciaTrailerKm" class="block text-gray-700 text-sm mb-2">Distancia del viaje
+                            (kilómetros):</label>
+                        <input type="number" id="distanciaTrailerKm" class="p-3 border rounded-lg w-full"
+                            placeholder="Ej: 500" min="0">
+                        <p id="errorDistanciaTrailer" class="error-message hidden">Por favor, ingrese un número válido.
+                        </p>
+                    </div>
+                    <div class="input-group">
+                        <label for="factorEmisionTrailerCarga" class="block text-gray-700 text-sm mb-2">Factor de
+                            emisión (kg CO₂e/tonelada-km):</label>
+                        <input type="number" id="factorEmisionTrailerCarga" class="p-3 border rounded-lg w-full"
+                            value="0.10" step="0.01" min="0">
+                        <p id="errorFactorTrailerCarga" class="error-message hidden">Por favor, ingrese un número
+                            válido.</p>
+                        <p class="text-xs text-gray-500 mt-1">Valor típico: 0.05 - 0.20 kg CO₂e/tonelada-km</p>
+                    </div>
+                </div>
+                <button id="calcularTrailerCargaDistancia" class="calculate-button w-full md:w-auto">Calcular Emisiones
+                    (por Carga)</button>
+                <div id="resultadoTrailerCargaDistancia" class="result-box hidden"></div>
+            </div>
         </div>
 
         <div class="mb-12 p-6 bg-green-50 rounded-lg shadow-inner">
@@ -265,16 +311,31 @@
                 HFO: 3114, // kg CO2/tonelada
                 dieselMarino: 3206 // kg CO2/tonelada
             }
-            // Para carga aérea y buque por carga, el factor ya se proporciona por tonelada-km
         };
 
         // --- Elementos del DOM ---
-        // Tráiler
+        // Tráiler - Tabs
+        const tabTrailerConsumo = document.getElementById('tabTrailerConsumo');
+        const tabTrailerCargaDistancia = document.getElementById('tabTrailerCargaDistancia');
+        const contentTrailerConsumo = document.getElementById('contentTrailerConsumo');
+        const contentTrailerCargaDistancia = document.getElementById('contentTrailerCargaDistancia');
+
+        // Tráiler - Por Consumo Directo (Litros)
         const consumoLitrosInput = document.getElementById('consumoLitros');
         const tipoCombustibleTrailerSelect = document.getElementById('tipoCombustibleTrailer');
         const calcularTrailerBtn = document.getElementById('calcularTrailer');
         const resultadoTrailerDiv = document.getElementById('resultadoTrailer');
         const errorConsumoLitros = document.getElementById('errorConsumoLitros');
+
+        // Tráiler - Por Carga y Distancia
+        const pesoCargaTrailerKgInput = document.getElementById('pesoCargaTrailerKg');
+        const distanciaTrailerKmInput = document.getElementById('distanciaTrailerKm');
+        const factorEmisionTrailerCargaInput = document.getElementById('factorEmisionTrailerCarga');
+        const calcularTrailerCargaDistanciaBtn = document.getElementById('calcularTrailerCargaDistancia');
+        const resultadoTrailerCargaDistanciaDiv = document.getElementById('resultadoTrailerCargaDistancia');
+        const errorPesoCargaTrailer = document.getElementById('errorPesoCargaTrailer');
+        const errorDistanciaTrailer = document.getElementById('errorDistanciaTrailer');
+        const errorFactorTrailerCarga = document.getElementById('errorFactorTrailerCarga');
 
         // Buque - Tabs
         const tabBuqueTEU = document.getElementById('tabBuqueTEU');
@@ -331,9 +392,9 @@
         // --- Funciones de Cálculo ---
 
         /**
-         * Calcula las emisiones de CO2 para un tráiler.
+         * Calcula las emisiones de CO2 para un tráiler por consumo directo.
          */
-        function calcularEmisionesTrailer() {
+        function calcularEmisionesTrailerConsumo() {
             const consumoLitros = validateInput(consumoLitrosInput.value, errorConsumoLitros);
             const tipoCombustible = tipoCombustibleTrailerSelect.value;
 
@@ -348,6 +409,28 @@
             resultadoTrailerDiv.innerHTML = `Emisiones estimadas: <span class="font-bold text-blue-900">${emisiones.toFixed(2)} kg CO$_2$</span>`;
             resultadoTrailerDiv.classList.remove('hidden');
         }
+
+        /**
+         * Calcula las emisiones de CO2 para un tráiler por carga y distancia.
+         */
+        function calcularEmisionesTrailerCargaDistancia() {
+            const pesoCargaKg = validateInput(pesoCargaTrailerKgInput.value, errorPesoCargaTrailer);
+            const distanciaKm = validateInput(distanciaTrailerKmInput.value, errorDistanciaTrailer);
+            const factorEmisionCarga = validateInput(factorEmisionTrailerCargaInput.value, errorFactorTrailerCarga);
+
+            if (pesoCargaKg === null || distanciaKm === null || factorEmisionCarga === null) {
+                resultadoTrailerCargaDistanciaDiv.classList.add('hidden');
+                return;
+            }
+
+            // Convertir peso de kg a toneladas para la fórmula
+            const pesoCargaTon = pesoCargaKg / 1000;
+            const emisiones = pesoCargaTon * distanciaKm * factorEmisionCarga;
+
+            resultadoTrailerCargaDistanciaDiv.innerHTML = `Emisiones estimadas para tu carga: <span class="font-bold text-blue-900">${emisiones.toFixed(2)} kg CO$_2$e</span>`;
+            resultadoTrailerCargaDistanciaDiv.classList.remove('hidden');
+        }
+
 
         /**
          * Calcula las emisiones de CO2 para un buque portacontenedores por capacidad (TEU).
@@ -414,35 +497,27 @@
         }
 
         // --- Event Listeners ---
-        calcularTrailerBtn.addEventListener('click', calcularEmisionesTrailer);
+        // Tráiler
+        calcularTrailerBtn.addEventListener('click', calcularEmisionesTrailerConsumo);
+        calcularTrailerCargaDistanciaBtn.addEventListener('click', calcularEmisionesTrailerCargaDistancia);
+
+        // Buque
         calcularBuqueBtn.addEventListener('click', calcularEmisionesBuquePorTEU);
         calcularBuqueCargaDistanciaBtn.addEventListener('click', calcularEmisionesBuquePorCargaDistancia);
+
+        // Aéreo
         calcularAereoBtn.addEventListener('click', calcularEmisionesAereo);
 
         // Ocultar resultados al cambiar inputs
+        // Tráiler
         consumoLitrosInput.addEventListener('input', () => resultadoTrailerDiv.classList.add('hidden'));
         tipoCombustibleTrailerSelect.addEventListener('change', () => resultadoTrailerDiv.classList.add('hidden'));
 
-        // Buque - Resetear resultados al cambiar de tab
-        tabBuqueTEU.addEventListener('click', () => {
-            tabBuqueTEU.classList.add('active');
-            tabBuqueCargaDistancia.classList.remove('active');
-            contentBuqueTEU.classList.remove('hidden');
-            contentBuqueCargaDistancia.classList.add('hidden');
-            resultadoBuqueDiv.classList.add('hidden');
-            resultadoBuqueCargaDistanciaDiv.classList.add('hidden');
-        });
+        pesoCargaTrailerKgInput.addEventListener('input', () => resultadoTrailerCargaDistanciaDiv.classList.add('hidden'));
+        distanciaTrailerKmInput.addEventListener('input', () => resultadoTrailerCargaDistanciaDiv.classList.add('hidden'));
+        factorEmisionTrailerCargaInput.addEventListener('input', () => resultadoTrailerCargaDistanciaDiv.classList.add('hidden'));
 
-        tabBuqueCargaDistancia.addEventListener('click', () => {
-            tabBuqueCargaDistancia.classList.add('active');
-            tabBuqueTEU.classList.remove('active');
-            contentBuqueCargaDistancia.classList.remove('hidden');
-            contentBuqueTEU.classList.add('hidden');
-            resultadoBuqueDiv.classList.add('hidden');
-            resultadoBuqueCargaDistanciaDiv.classList.add('hidden');
-        });
-
-        // Buque - Ocultar resultados al cambiar inputs (para ambos tabs)
+        // Buque
         consumoBuqueToneladasInput.addEventListener('input', () => resultadoBuqueDiv.classList.add('hidden'));
         tipoCombustibleBuqueSelect.addEventListener('change', () => resultadoBuqueDiv.classList.add('hidden'));
         capacidadBuqueTEUInput.addEventListener('input', () => resultadoBuqueDiv.classList.add('hidden'));
@@ -451,11 +526,39 @@
         distanciaBuqueKmInput.addEventListener('input', () => resultadoBuqueCargaDistanciaDiv.classList.add('hidden'));
         factorEmisionBuqueCargaInput.addEventListener('input', () => resultadoBuqueCargaDistanciaDiv.classList.add('hidden'));
 
-
+        // Aéreo
         pesoCargaKgInput.addEventListener('input', () => resultadoAereoDiv.classList.add('hidden'));
         distanciaKmInput.addEventListener('input', () => resultadoAereoDiv.classList.add('hidden'));
         factorEmisionAereoInput.addEventListener('input', () => resultadoAereoDiv.classList.add('hidden'));
 
+        // --- Lógica de pestañas ---
+        function setupTabs(tabButtons, tabContents) {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    tabContents.forEach(content => content.classList.add('hidden'));
+                    const targetId = button.id.replace('tab', 'content');
+                    document.getElementById(targetId).classList.remove('hidden');
+
+                    // Ocultar todos los resultados al cambiar de pestaña en la misma sección
+                    document.querySelectorAll('.result-box').forEach(rb => rb.classList.add('hidden'));
+                });
+            });
+        }
+
+        // Configurar pestañas para Tráiler
+        setupTabs(
+            [tabTrailerConsumo, tabTrailerCargaDistancia],
+            [contentTrailerConsumo, contentTrailerCargaDistancia]
+        );
+
+        // Configurar pestañas para Buque
+        setupTabs(
+            [tabBuqueTEU, tabBuqueCargaDistancia],
+            [contentBuqueTEU, contentBuqueCargaDistancia]
+        );
     </script>
 </body>
 
