@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Emisiones de CO2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            /* Light gray background */
+        }
+
+        .input-group label {
+            font-weight: 600;
+            /* Semi-bold for labels */
+        }
+
+        .input-group input,
+        .input-group select {
+            border-radius: 0.5rem;
+            /* rounded-lg */
+            border: 1px solid #d1d5db;
+            /* border-gray-300 */
+            padding: 0.75rem 1rem;
+            /* p-3 */
+            width: 100%;
+            box-sizing: border-box;
+            /* Ensures padding doesn't add to width */
+            transition: border-color 0.2s ease-in-out;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            /* ring-blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            /* ring-blue-500 with opacity */
+        }
+
+        .calculate-button {
+            background-color: #2563eb;
+            /* blue-700 */
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            /* py-3 px-6 */
+            border-radius: 0.5rem;
+            /* rounded-lg */
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* shadow-md */
+        }
+
+        .calculate-button:hover {
+            background-color: #1d4ed8;
+            /* blue-800 */
+            transform: translateY(-1px);
+        }
+
+        .calculate-button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .result-box {
+            background-color: #e0f2fe;
+            /* blue-50 */
+            border: 1px solid #93c5fd;
+            /* blue-300 */
+            color: #1e40af;
+            /* blue-800 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #dc2626;
+            /* red-600 */
+            font-size: 0.875rem;
+            /* text-sm */
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
+    <div class="container mx-auto p-6 bg-white shadow-xl rounded-xl max-w-4xl w-full">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-8 text-center">Calculadora de Emisiones de CO$_2$</h1>
+
+        <div class="mb-12 p-6 bg-blue-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4">1. Transporte por Tráiler</h2>
+            <p class="text-gray-700 mb-4">Calcula las emisiones basándose en el consumo de combustible.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="input-group">
+                    <label for="consumoLitros" class="block text-gray-700 text-sm mb-2">Consumo de combustible
+                        (litros):</label>
+                    <input type="number" id="consumoLitros" class="p-3 border rounded-lg w-full" placeholder="Ej: 500"
+                        min="0">
+                    <p id="errorConsumoLitros" class="error-message hidden">Por favor, ingrese un número válido.</p>
+                </div>
+                <div class="input-group">
+                    <label for="tipoCombustibleTrailer" class="block text-gray-700 text-sm mb-2">Tipo de
+                        combustible:</label>
+                    <select id="tipoCombustibleTrailer" class="p-3 border rounded-lg w-full">
+                        <option value="diesel">Diésel</option>
+                        <option value="gasolina">Gasolina</option>
+                    </select>
+                </div>
+            </div>
+            <button id="calcularTrailer" class="calculate-button w-full md:w-auto">Calcular Emisiones</button>
+            <div id="resultadoTrailer" class="result-box hidden"></div>
+        </div>
+
+        <div class="mb-12 p-6 bg-green-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-bold text-green-800 mb-4">2. Transporte por Buque Portacontenedores</h2>
+            <p class="text-gray-700 mb-4">Calcula las emisiones atribuidas a un contenedor específico en un viaje.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="input-group">
+                    <label for="consumoBuqueToneladas" class="block text-gray-700 text-sm mb-2">Consumo de combustible
+                        del buque (toneladas):</label>
+                    <input type="number" id="consumoBuqueToneladas" class="p-3 border rounded-lg w-full"
+                        placeholder="Ej: 150" min="0">
+                    <p id="errorConsumoBuque" class="error-message hidden">Por favor, ingrese un número válido.</p>
+                </div>
+                <div class="input-group">
+                    <label for="tipoCombustibleBuque" class="block text-gray-700 text-sm mb-2">Tipo de combustible del
+                        buque:</label>
+                    <select id="tipoCombustibleBuque" class="p-3 border rounded-lg w-full">
+                        <option value="HFO">Fuel Oil Pesado (HFO)</option>
+                        <option value="dieselMarino">Diésel Marino / Gasoil Marino (MGO/MDO)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="capacidadBuqueTEU" class="block text-gray-700 text-sm mb-2">Capacidad total del buque
+                        (TEU):</label>
+                    <input type="number" id="capacidadBuqueTEU" class="p-3 border rounded-lg w-full"
+                        placeholder="Ej: 5000" min="1">
+                    <p id="errorCapacidadBuque" class="error-message hidden">Por favor, ingrese un número válido (mayor
+                        que 0).</p>
+                </div>
+            </div>
+            <button id="calcularBuque" class="calculate-button w-full md:w-auto">Calcular Emisiones</button>
+            <div id="resultadoBuque" class="result-box hidden"></div>
+        </div>
+
+        <div class="p-6 bg-purple-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-bold text-purple-800 mb-4">3. Transporte Aéreo (Carga)</h2>
+            <p class="text-gray-700 mb-4">Calcula las emisiones basándose en el peso de la carga, la distancia y un
+                factor de emisión con RFI.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="input-group">
+                    <label for="pesoCargaKg" class="block text-gray-700 text-sm mb-2">Peso de la carga
+                        (kilogramos):</label>
+                    <input type="number" id="pesoCargaKg" class="p-3 border rounded-lg w-full" placeholder="Ej: 200"
+                        min="0">
+                    <p id="errorPesoCarga" class="error-message hidden">Por favor, ingrese un número válido.</p>
+                </div>
+                <div class="input-group">
+                    <label for="distanciaKm" class="block text-gray-700 text-sm mb-2">Distancia (kilómetros):</label>
+                    <input type="number" id="distanciaKm" class="p-3 border rounded-lg w-full" placeholder="Ej: 5000"
+                        min="0">
+                    <p id="errorDistanciaKm" class="error-message hidden">Por favor, ingrese un número válido.</p>
+                </div>
+                <div class="input-group">
+                    <label for="factorEmisionAereo" class="block text-gray-700 text-sm mb-2">Factor de emisión (kg
+                        CO₂e/tonelada-km):</label>
+                    <input type="number" id="factorEmisionAereo" class="p-3 border rounded-lg w-full" value="1.0"
+                        step="0.1" min="0">
+                    <p id="errorFactorAereo" class="error-message hidden">Por favor, ingrese un número válido.</p>
+                </div>
+            </div>
+            <button id="calcularAereo" class="calculate-button w-full md:w-auto">Calcular Emisiones</button>
+            <div id="resultadoAereo" class="result-box hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // Factores de emisión (aproximados)
+        const FACTORES_EMISION = {
+            trailer: {
+                diesel: 2.68, // kg CO2/litro
+                gasolina: 2.31 // kg CO2/litro
+            },
+            buque: {
+                HFO: 3114, // kg CO2/tonelada
+                dieselMarino: 3206 // kg CO2/tonelada
+            }
+            // Para carga aérea, el factor ya se proporciona por tonelada-km
+        };
+
+        // --- Elementos del DOM ---
+        // Tráiler
+        const consumoLitrosInput = document.getElementById('consumoLitros');
+        const tipoCombustibleTrailerSelect = document.getElementById('tipoCombustibleTrailer');
+        const calcularTrailerBtn = document.getElementById('calcularTrailer');
+        const resultadoTrailerDiv = document.getElementById('resultadoTrailer');
+        const errorConsumoLitros = document.getElementById('errorConsumoLitros');
+
+        // Buque
+        const consumoBuqueToneladasInput = document.getElementById('consumoBuqueToneladas');
+        const tipoCombustibleBuqueSelect = document.getElementById('tipoCombustibleBuque');
+        const capacidadBuqueTEUInput = document.getElementById('capacidadBuqueTEU');
+        const calcularBuqueBtn = document.getElementById('calcularBuque');
+        const resultadoBuqueDiv = document.getElementById('resultadoBuque');
+        const errorConsumoBuque = document.getElementById('errorConsumoBuque');
+        const errorCapacidadBuque = document.getElementById('errorCapacidadBuque');
+
+        // Aéreo
+        const pesoCargaKgInput = document.getElementById('pesoCargaKg');
+        const distanciaKmInput = document.getElementById('distanciaKm');
+        const factorEmisionAereoInput = document.getElementById('factorEmisionAereo');
+        const calcularAereoBtn = document.getElementById('calcularAereo');
+        const resultadoAereoDiv = document.getElementById('resultadoAereo');
+        const errorPesoCarga = document.getElementById('errorPesoCarga');
+        const errorDistanciaKm = document.getElementById('errorDistanciaKm');
+        const errorFactorAereo = document.getElementById('errorFactorAereo');
+
+        /**
+         * Valida si un valor es un número positivo (o cero para algunos casos).
+         * @param {string} value - El valor a validar.
+         * @param {HTMLElement} errorElement - El elemento donde mostrar el mensaje de error.
+         * @param {boolean} allowZero - Si se permite el valor cero.
+         * @returns {number|null} El número parseado si es válido, de lo contrario null.
+         */
+        function validateInput(value, errorElement, allowZero = true) {
+            const num = parseFloat(value);
+            if (isNaN(num) || (!allowZero && num <= 0) || (allowZero && num < 0)) {
+                errorElement.classList.remove('hidden');
+                return null;
+            }
+            errorElement.classList.add('hidden');
+            return num;
+        }
+
+        // --- Funciones de Cálculo ---
+
+        /**
+         * Calcula las emisiones de CO2 para un tráiler.
+         */
+        function calcularEmisionesTrailer() {
+            const consumoLitros = validateInput(consumoLitrosInput.value, errorConsumoLitros);
+            const tipoCombustible = tipoCombustibleTrailerSelect.value;
+
+            if (consumoLitros === null) {
+                resultadoTrailerDiv.classList.add('hidden');
+                return;
+            }
+
+            const factor = FACTORES_EMISION.trailer[tipoCombustible];
+            const emisiones = consumoLitros * factor;
+
+            resultadoTrailerDiv.innerHTML = `Emisiones estimadas: <span class="font-bold text-blue-900">${emisiones.toFixed(2)} kg CO$_2$</span>`;
+            resultadoTrailerDiv.classList.remove('hidden');
+        }
+
+        /**
+         * Calcula las emisiones de CO2 para un buque portacontenedores.
+         */
+        function calcularEmisionesBuque() {
+            const consumoBuqueToneladas = validateInput(consumoBuqueToneladasInput.value, errorConsumoBuque);
+            const tipoCombustibleBuque = tipoCombustibleBuqueSelect.value;
+            const capacidadBuqueTEU = validateInput(capacidadBuqueTEUInput.value, errorCapacidadBuque, false); // No permite cero
+
+            if (consumoBuqueToneladas === null || capacidadBuqueTEU === null) {
+                resultadoBuqueDiv.classList.add('hidden');
+                return;
+            }
+
+            const factor = FACTORES_EMISION.buque[tipoCombustibleBuque];
+            const emisionesTotalesBuque = consumoBuqueToneladas * factor;
+            const emisionesPorContenedor = emisionesTotalesBuque / capacidadBuqueTEU;
+
+            resultadoBuqueDiv.innerHTML = `Emisiones estimadas por contenedor (1 TEU): <span class="font-bold text-green-900">${emisionesPorContenedor.toFixed(2)} kg CO$_2$</span>`;
+            resultadoBuqueDiv.classList.remove('hidden');
+        }
+
+        /**
+         * Calcula las emisiones de CO2 para carga aérea.
+         */
+        function calcularEmisionesAereo() {
+            const pesoCargaKg = validateInput(pesoCargaKgInput.value, errorPesoCarga);
+            const distanciaKm = validateInput(distanciaKmInput.value, errorDistanciaKm);
+            const factorEmisionAereo = validateInput(factorEmisionAereoInput.value, errorFactorAereo);
+
+            if (pesoCargaKg === null || distanciaKm === null || factorEmisionAereo === null) {
+                resultadoAereoDiv.classList.add('hidden');
+                return;
+            }
+
+            // Convertir peso de kg a toneladas para la fórmula
+            const pesoCargaTon = pesoCargaKg / 1000;
+            const emisiones = pesoCargaTon * distanciaKm * factorEmisionAereo;
+
+            resultadoAereoDiv.innerHTML = `Emisiones estimadas: <span class="font-bold text-purple-900">${emisiones.toFixed(2)} kg CO$_2$e</span>`;
+            resultadoAereoDiv.classList.remove('hidden');
+        }
+
+        // --- Event Listeners ---
+        calcularTrailerBtn.addEventListener('click', calcularEmisionesTrailer);
+        calcularBuqueBtn.addEventListener('click', calcularEmisionesBuque);
+        calcularAereoBtn.addEventListener('click', calcularEmisionesAereo);
+
+        // Ocultar resultados al cambiar inputs
+        consumoLitrosInput.addEventListener('input', () => resultadoTrailerDiv.classList.add('hidden'));
+        tipoCombustibleTrailerSelect.addEventListener('change', () => resultadoTrailerDiv.classList.add('hidden'));
+
+        consumoBuqueToneladasInput.addEventListener('input', () => resultadoBuqueDiv.classList.add('hidden'));
+        tipoCombustibleBuqueSelect.addEventListener('change', () => resultadoBuqueDiv.classList.add('hidden'));
+        capacidadBuqueTEUInput.addEventListener('input', () => resultadoBuqueDiv.classList.add('hidden'));
+
+        pesoCargaKgInput.addEventListener('input', () => resultadoAereoDiv.classList.add('hidden'));
+        distanciaKmInput.addEventListener('input', () => resultadoAereoDiv.classList.add('hidden'));
+        factorEmisionAereoInput.addEventListener('input', () => resultadoAereoDiv.classList.add('hidden'));
+
+    </script>
+</body>
+
+</html>
